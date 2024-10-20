@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Teacher {
+  id                 Int         @id @default(autoincrement())
+  name               String
+  password           String
+  role               String      @default("user")
+  classroomsAsTeacher1 Classroom[] @relation("Teacher1")
+  classroomsAsTeacher2 Classroom[] @relation("Teacher2")
+  behaviorLogs       BehaviorLog[]
+}
+
+model Classroom {
+  id           Int      @id @default(autoincrement())
+  name         String   // เช่น "ม.1/1"
+  department   String?   // แผนการเรียน
+  teacher1Id   Int?
+  teacher2Id   Int?
+  teacher1     Teacher? @relation("Teacher1", fields: [teacher1Id], references: [id])
+  teacher2     Teacher? @relation("Teacher2", fields: [teacher2Id], references: [id])
+  students     Student[]
+}
+
+model Student {
+  id             Int      @id @default(autoincrement())
+  studentNumber  String   @unique
+  firstName      String
+  lastName       String
+  nickname       String?
+  classroomId    Int
+  behaviorScore  Int      @default(100)
+  classroom      Classroom @relation(fields: [classroomId], references: [id])
+  behaviorLogs   BehaviorLog[]
+}
+
+model BehaviorType {
+  id           Int      @id @default(autoincrement())
+  name         String
+  category     String   // "positive" หรือ "negative"
+  score        Int
+  behaviorLogs BehaviorLog[]
+}
+
+model BehaviorLog {
+  id           Int          @id @default(autoincrement())
+  studentId    Int
+  behaviorId   Int
+  teacherId    Int
+  status       String       @default("pending")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  imageUrl     String?
+  student      Student      @relation(fields: [studentId], references: [id])
+  behaviorType BehaviorType @relation(fields: [behaviorId], references: [id])
+  teacher      Teacher      @relation(fields: [teacherId], references: [id])
+}
