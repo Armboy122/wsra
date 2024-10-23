@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createBehaviorLog, updateMultipleBehaviorLogStatus } from '@/services/behaviorService';
-import { updateStudentBehaviorScore } from '@/services/studentService';
+import { approveAndUpdateScores} from '@/services/studentService';
 import { CreateBehaviorLogInput } from '@/types';
 
 // บันทึกพฤติกรรมใหม่
@@ -26,15 +26,6 @@ export async function POST(req: Request) {
       // สร้างบันทึกพฤติกรรมใหม่
       const behaviorLog = await createBehaviorLog(input);
 
-      // อัพเดตคะแนนพฤติกรรมของนักเรียน
-      // คำนวณคะแนนรวมจากพฤติกรรมทั้งหมดที่ถูกบันทึก
-      const totalScore = behaviorLog.behaviorTypes.reduce(
-        (sum, bt) => sum + (bt.behaviorType.score || 0), 
-        0
-      );
-      
-      await updateStudentBehaviorScore(studentId, totalScore);
-      
       return NextResponse.json(behaviorLog);
     } catch (error) {
       console.error('เกิดข้อผิดพลาดในการสร้างบันทึกพฤติกรรม:', error);
@@ -47,16 +38,21 @@ export async function PATCH(req: Request) {
   const body = await req.json();
   const { ids, status } = body;
 
-  // ตรวจสอบความถูกต้องของข้อมูล
   if (!Array.isArray(ids) || ids.length === 0 || !status) {
     return NextResponse.json({ error: 'ข้อมูลไม่ถูกต้อง' }, { status: 400 });
   }
 
   try {
     const updatedCount = await updateMultipleBehaviorLogStatus(ids, status);
-    return NextResponse.json({ 
+
+    // ถ้าสถานะเป็น approved ให้อัพเดตคะแนน
+    if (status === 'approved') {
+      await approveAndUpdateScores(ids);
+    }
+
+    return NextResponse.json({
       message: `อัพเดตสถานะสำเร็จ ${updatedCount} รายการ`,
-      updatedCount 
+      updatedCount
     });
   } catch (error) {
     console.error('เกิดข้อผิดพลาดในการอัพเดตสถานะบันทึกพฤติกรรม:', error);

@@ -75,3 +75,4 @@ export async function updateMultipleBehaviorLogStatus(ids: number[], status: str
  })
  return result.count
 }
+

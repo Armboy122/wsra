@@ -28,3 +28,28 @@ export async function updateClassroomBehaviorScores(classroomId: number, scoreCh
     data: { behaviorScore: { increment: scoreChange } },
   })
 }
+
+export async function approveAndUpdateScores(ids: number[]): Promise<void> {
+  // ดึงข้อมูล behavior logs ที่ถูกอัพเดต
+  const behaviorLogs = await prisma.behaviorLog.findMany({
+    where: {
+      id: { in: ids }
+    },
+    include: {
+      behaviorTypes: {
+        include: {
+          behaviorType: true
+        }
+      }
+    }
+  });
+
+  // อัพเดตคะแนนสำหรับแต่ละ behavior log
+  for (const log of behaviorLogs) {
+    const totalScore = log.behaviorTypes.reduce(
+      (sum, bt) => sum + (bt.behaviorType.score || 0),
+      0
+    );
+    await updateStudentBehaviorScore(log.studentId, totalScore);
+  }
+}
