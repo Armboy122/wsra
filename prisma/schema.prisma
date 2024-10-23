@@ -1,63 +1,80 @@
+// กำหนดให้ใช้ Prisma Client JS
 generator client {
   provider = "prisma-client-js"
 }
 
+// กำหนดฐานข้อมูลเป็น PostgreSQL
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+// โมเดลครู
 model Teacher {
-  id                 Int         @id @default(autoincrement())
-  name               String
-  password           String
-  role               String      @default("user")
-  classroomsAsTeacher1 Classroom[] @relation("Teacher1")
-  classroomsAsTeacher2 Classroom[] @relation("Teacher2")
-  behaviorLogs       BehaviorLog[]
+  id                   Int           @id @default(autoincrement())  // รหัสครู (เพิ่มอัตโนมัติ)
+  name                 String        // ชื่อครู
+  password             String        // รหัสผ่าน
+  role                 String        @default("Teacher") // บทบาท (ค่าเริ่มต้นเป็น "user")
+  classroomsAsTeacher1 Classroom[]   @relation("Teacher1") // ห้องเรียนที่เป็นครูที่ปรึกษาคนที่ 1
+  classroomsAsTeacher2 Classroom[]   @relation("Teacher2") // ห้องเรียนที่เป็นครูที่ปรึกษาคนที่ 2
+  behaviorLogs         BehaviorLog[] // บันทึกความประพฤติที่ครูคนนี้เป็นผู้บันทึก
 }
 
+// โมเดลห้องเรียน
 model Classroom {
-  id           Int      @id @default(autoincrement())
-  name         String   // เช่น "ม.1/1"
-  department   String?   // แผนการเรียน
-  teacher1Id   Int?
-  teacher2Id   Int?
-  teacher1     Teacher? @relation("Teacher1", fields: [teacher1Id], references: [id])
-  teacher2     Teacher? @relation("Teacher2", fields: [teacher2Id], references: [id])
-  students     Student[]
+  id           Int       @id @default(autoincrement()) // รหัสห้องเรียน
+  name         String    // ชื่อห้อง (เช่น "ม.1/1")
+  department   String?   // แผนการเรียน (อาจไม่มีก็ได้)
+  teacher1Id   Int?      // รหัสครูที่ปรึกษาคนที่ 1
+  teacher2Id   Int?      // รหัสครูที่ปรึกษาคนที่ 2
+  teacher1     Teacher?  @relation("Teacher1", fields: [teacher1Id], references: [id])  // ความสัมพันธ์กับครูที่ปรึกษาคนที่ 1
+  teacher2     Teacher?  @relation("Teacher2", fields: [teacher2Id], references: [id])  // ความสัมพันธ์กับครูที่ปรึกษาคนที่ 2
+  students     Student[] // นักเรียนในห้องนี้
 }
 
+// โมเดลนักเรียน
 model Student {
-  id             Int      @id @default(autoincrement())
-  studentNumber  String   @unique
-  firstName      String
-  lastName       String
-  nickname       String?
-  classroomId    Int
-  behaviorScore  Int      @default(100)
-  classroom      Classroom @relation(fields: [classroomId], references: [id])
-  behaviorLogs   BehaviorLog[]
+  id             Int           @id @default(autoincrement()) // รหัสนักเรียน
+  studentNumber  String        @unique  // เลขประจำตัวนักเรียน (ห้ามซ้ำ)
+  firstName      String        // ชื่อจริง
+  lastName       String        // นามสกุล
+  nickname       String?       // ชื่อเล่น (อาจไม่มีก็ได้)
+  classroomId    Int          // รหัสห้องเรียน
+  behaviorScore  Int          @default(100) // คะแนนความประพฤติ (เริ่มต้นที่ 100)
+  classroom      Classroom    @relation(fields: [classroomId], references: [id]) // ความสัมพันธ์กับห้องเรียน
+  behaviorLogs   BehaviorLog[] // บันทึกความประพฤติของนักเรียนคนนี้
 }
 
+// โมเดลประเภทความประพฤติ
 model BehaviorType {
-  id           Int      @id @default(autoincrement())
-  name         String
-  category     String   // "positive" หรือ "negative"
-  score        Int
-  behaviorLogs BehaviorLog[]
+  id            Int                    @id @default(autoincrement()) // รหัสประเภทความประพฤติ
+  name          String                 // ชื่อประเภท
+  category      String                 // หมวดหมู่ ("positive" หรือ "negative")
+  score         Int                    // คะแนนที่จะได้/เสีย
+  behaviorLogs  BehaviorLogBehavior[] // ความสัมพันธ์กับบันทึกความประพฤติ (ผ่านตารางเชื่อม)
 }
 
+// โมเดลบันทึกความประพฤติ
 model BehaviorLog {
-  id           Int          @id @default(autoincrement())
-  studentId    Int
-  behaviorId   Int
-  teacherId    Int
-  status       String       @default("pending")
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  imageUrl     String?
-  student      Student      @relation(fields: [studentId], references: [id])
-  behaviorType BehaviorType @relation(fields: [behaviorId], references: [id])
-  teacher      Teacher      @relation(fields: [teacherId], references: [id])
+  id            Int                    @id @default(autoincrement()) // รหัสบันทึก
+  studentId     Int                    // รหัสนักเรียน
+  teacherId     Int                    // รหัสครูผู้บันทึก
+  status        String                 @default("pending") // สถานะ (เริ่มต้นเป็น "pending")
+  description   String?                // รายละเอียดเพิ่มเติม (optional)
+  createdAt     DateTime              @default(now()) // วันเวลาที่สร้าง
+  updatedAt     DateTime              @updatedAt // วันเวลาที่อัปเดตล่าสุด
+  imageUrl      String?               // URL รูปภาพ (ถ้ามี)
+  student       Student               @relation(fields: [studentId], references: [id]) // ความสัมพันธ์กับนักเรียน
+  teacher       Teacher               @relation(fields: [teacherId], references: [id]) // ความสัมพันธ์กับครู
+  behaviorTypes BehaviorLogBehavior[] // ความสัมพันธ์กับประเภทความประพฤติ (ผ่านตารางเชื่อม)
+}
+
+// ตารางเชื่อมระหว่าง BehaviorLog และ BehaviorType (ความสัมพันธ์แบบ many-to-many)
+model BehaviorLogBehavior {
+  behaviorLog    BehaviorLog   @relation(fields: [behaviorLogId], references: [id])
+  behaviorType   BehaviorType  @relation(fields: [behaviorTypeId], references: [id])
+  behaviorLogId  Int
+  behaviorTypeId Int
+  
+  @@id([behaviorLogId, behaviorTypeId]) // กำหนด Primary Key แบบผสม
 }
