@@ -26,6 +26,7 @@ const handler = NextAuth({
           return {
             id: user.id.toString(),
             name: user.name,
+            role: user.role,
           };
         } else {
           throw new Error("Invalid  password");
@@ -39,14 +40,16 @@ const handler = NextAuth({
   },
   callbacks: {
     jwt: async ({ token, user }) => {
-      if (user) {
+      if (user && 'role' in user) {
         token.id = user.id;
+        token.role = user.role;
       }
       return token;
     },
     session: async ({ session, token }) => {
       if (session.user) {
         session.user.id = token.id as string;
+        session.user.role = token.role as string;
       }
       return session;
     },
