@@ -9,7 +9,7 @@ export default function ClassroomDropdown({ onSelectRoom }: Props) {
 
   return (
     <div className="relative group">
-      <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-lg transition-all duration-200 hover:shadow-md">
+      <button className="inline-flex items-center px-4 py-2 text-md font-medium text-orange-600 bg-white hover:bg-orange-50 rounded-lg transition-all duration-200 hover:shadow-md">
         <ChartBarIcon className="h-5 w-5 mr-2" />
         คะแนนนักเรียน
       </button>

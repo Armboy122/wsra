@@ -5,6 +5,8 @@ import {
   ArrowLeftIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
 } from "@heroicons/react/24/outline";
 
 interface Student {
@@ -26,16 +28,40 @@ export default function ClassroomPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [classroom, setClassroom] = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const totalPages = Math.ceil(students.length / itemsPerPage);
 
-  const paginatedStudents = students.slice(
+  // ฟังก์ชันสำหรับเรียงลำดับ
+  const sortedStudents = [...students].sort((a, b) => {
+    if (sortOrder === "asc") {
+      return a.behaviorScore - b.behaviorScore;
+    } else if (sortOrder === "desc") {
+      return b.behaviorScore - a.behaviorScore;
+    }
+    return 0;
+  });
+
+  const paginatedStudents = sortedStudents.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  // ฟังก์ชันสลับการเรียงลำดับ
+  const toggleSort = () => {
+    if (sortOrder === null) {
+      setSortOrder("desc");
+    } else if (sortOrder === "desc") {
+      setSortOrder("asc");
+    } else {
+      setSortOrder(null);
+    }
+    // Reset หน้าเมื่อมีการเรียงลำดับใหม่
+    setCurrentPage(1);
+  };
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -127,8 +153,22 @@ export default function ClassroomPage() {
                 <th className="w-[50%] px-6 py-4 text-left text-md font-medium text-gray-500">
                   ชื่อ-สกุล
                 </th>
-                <th className="w-[20%] py-4 text-center text-md font-medium text-gray-500">
-                  คะแนนความประพฤติ
+                <th
+                  className="w-[20%] py-4 text-center text-md font-medium text-gray-500 cursor-pointer group"
+                  onClick={toggleSort}
+                >
+                  <div className="inline-flex items-center gap-2">
+                    คะแนนความประพฤติ
+                    {sortOrder === null ? (
+                      <div className="opacity-0 group-hover:opacity-100">
+                        <ArrowUpIcon className="h-4 w-4" />
+                      </div>
+                    ) : sortOrder === "desc" ? (
+                      <ArrowDownIcon className="h-4 w-4" />
+                    ) : (
+                      <ArrowUpIcon className="h-4 w-4" />
+                    )}
+                  </div>
                 </th>
               </tr>
             </thead>

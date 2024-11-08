@@ -6,10 +6,10 @@ type Props = {
 }
 
 export default function NavButton({ icon, text, onClick, variant = 'primary' }: Props) {
-  const baseStyle = "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:shadow-md"
+  const baseStyle = "inline-flex items-center px-4 py-2 text-md font-medium rounded-lg transition-all duration-200 hover:shadow-md"
   const variants = {
     primary: "text-orange-600 bg-white hover:bg-orange-50",
-    danger: "text-white bg-red-500 hover:bg-red-600"
+    danger: "text-white bg-red-700 hover:bg-red-800"
   }
 
   return (
