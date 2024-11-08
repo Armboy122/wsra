@@ -1,11 +1,11 @@
-import NextAuth from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 
 const prisma = new PrismaClient();
 
-const handler = NextAuth({
+export const AuthOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -29,7 +29,7 @@ const handler = NextAuth({
             role: user.role,
           };
         } else {
-          throw new Error("Invalid  password");
+          throw new Error("Invalid password");
         }
       },
     }),
@@ -54,8 +54,7 @@ const handler = NextAuth({
       return session;
     },
   },
-});
-
-
-
-export { handler as GET, handler as POST };
+  pages: {
+    signIn: '/login',  // ระบุหน้า login custom
+  },
+};

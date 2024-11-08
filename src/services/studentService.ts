@@ -5,6 +5,9 @@ export async function getStudentsByClassroom(classroomId: number): Promise<Stude
   return prisma.student.findMany({
     where: { classroomId },
     include: { classroom: true },
+    orderBy: {
+      firstName: 'asc',
+    }
   })
 }
 
