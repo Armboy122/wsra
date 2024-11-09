@@ -8,6 +8,7 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
 } from "@heroicons/react/24/outline";
+import ExportExcelButton from "../../components/ExportExcelButton";
 
 interface Student {
   id: number;
@@ -132,10 +133,13 @@ export default function ClassroomPage() {
             ห้องเรียน{classroom}
           </h1>
         </div>
-        <div className="bg-orange-100 px-4 py-2 rounded-lg">
-          <span className="text-orange-600 font-medium">
-            จำนวนนักเรียน: {students.length} คน
-          </span>
+        <div className="flex items-center gap-4">
+          <ExportExcelButton students={students} classroom={classroom} />
+          <div className="bg-orange-100 px-4 py-2 rounded-lg">
+            <span className="text-orange-600 font-medium">
+              จำนวนนักเรียน: {students.length} คน
+            </span>
+          </div>
         </div>
       </div>
 
