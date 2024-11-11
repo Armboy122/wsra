@@ -14,8 +14,16 @@ export async function getStudentsByClassroom(classroomId: number): Promise<Stude
 export async function getStudentById(id: number): Promise<StudentWithClassroom | null> {
   return prisma.student.findUnique({
     where: { id },
-    include: { classroom: true },
-  })
+    include: {
+      classroom: {
+        select: {
+          id: true,
+          name: true,
+          department: true
+        }
+      }
+    }
+  });
 }
 
 export async function updateStudentBehaviorScore(studentId: number, scoreChange: number): Promise<void> {
