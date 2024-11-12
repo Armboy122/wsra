@@ -30,11 +30,48 @@ export async function getBehaviorTypes(category: string) {
 }
 export async function getBehavior_logs() {
   try {
-    const behaviors = await prisma.behaviorLog.findMany();
+    const behaviors = await prisma.behaviorLog.findMany({
+      include: {
+        student: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            studentNumber: true,
+            classroom: {
+              select: {
+                name: true
+              }
+            }
+          }
+        },
+        teacher: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        behaviorTypes: {
+          include: {
+            behaviorType: {
+              select: {
+                id: true,
+                name: true,
+                category: true,
+                score: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc' // เรียงจากใหม่ไปเก่า
+      }
+    });
 
     return behaviors;
   } catch (error) {
-    console.error("Error in getBehaviorTypes:", error);
+    console.error("Error in getBehaviorLogs:", error);
     return [];
   }
 }

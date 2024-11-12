@@ -120,49 +120,51 @@ export default function ClassroomPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between bg-white p-6 rounded-xl shadow-sm">
-        <div className="flex items-center gap-4">
+    <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white p-4 sm:p-6 rounded-xl shadow-sm gap-4">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
           <button
             onClick={() => router.back()}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <ArrowLeftIcon className="h-5 w-5 text-gray-600" />
           </button>
-          <h1 className="text-2xl font-semibold text-gray-800">
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 truncate">
             ห้องเรียน{classroom}
           </h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
           <ExportExcelButton students={students} classroom={classroom} />
-          <div className="bg-orange-100 px-4 py-2 rounded-lg">
-            <span className="text-orange-600 font-medium">
+          <div className="bg-orange-100 px-4 py-2 rounded-lg text-center">
+            <span className="text-orange-600 font-medium text-sm sm:text-base">
               จำนวนนักเรียน: {students.length} คน
             </span>
           </div>
         </div>
       </div>
 
+      {/* Table Section */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y table-fixed divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="w-[5%] px-3 py-4 text-center text-md font-medium text-gray-500">
+                <th className="px-3 py-3 sm:py-4 text-center text-sm sm:text-md font-medium text-gray-500 whitespace-nowrap">
                   ลำดับ
                 </th>
-                <th className="w-[15%] py-4 text-center text-md font-medium text-gray-500">
+                <th className="px-3 py-3 sm:py-4 text-center text-sm sm:text-md font-medium text-gray-500 whitespace-nowrap">
                   รหัสประจำตัว
                 </th>
-                <th className="w-[50%] px-6 py-4 text-left text-md font-medium text-gray-500">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-sm sm:text-md font-medium text-gray-500">
                   ชื่อ-สกุล
                 </th>
                 <th
-                  className="w-[20%] py-4 text-center text-md font-medium text-gray-500 cursor-pointer group"
                   onClick={toggleSort}
+                  className="px-3 py-3 sm:py-4 text-center text-sm sm:text-md font-medium text-gray-500 cursor-pointer group whitespace-nowrap"
                 >
-                  <div className="inline-flex items-center gap-2">
-                    คะแนนความประพฤติ
+                  <div className="inline-flex items-center gap-1 sm:gap-2">
+                    คะแนน
                     {sortOrder === null ? (
                       <div className="opacity-0 group-hover:opacity-100">
                         <ArrowUpIcon className="h-4 w-4" />
@@ -182,30 +184,30 @@ export default function ClassroomPage() {
                   key={student.id}
                   className="hover:bg-gray-50 transition-colors"
                 >
-                  <td className="w-[5%] px-3 py-4 text-center text-md text-gray-500 font-medium">
+                  <td className="px-3 py-3 sm:py-4 text-center text-sm sm:text-md text-gray-500 font-medium">
                     {(currentPage - 1) * itemsPerPage + index + 1}
                   </td>
-                  <td className="w-[15%] px-6 text-center py-4 text-md text-gray-900">
+                  <td className="px-3 text-center py-3 sm:py-4 text-sm sm:text-md text-gray-900">
                     {student.studentNumber}
                   </td>
-                  <td className="w-[50%] px-6  py-4 text-md text-gray-900">
-                    <div className="grid grid-cols-12 gap-4">
-                      <span className="col-span-6">{student.firstName}</span>
-                      <span className="col-span-6">{student.lastName}</span>
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 text-sm sm:text-md text-gray-900">
+                    <div className="flex flex-col sm:flex-row sm:gap-4">
+                      <span className="font-medium">{student.firstName}</span>
+                      <span>{student.lastName}</span>
                     </div>
                   </td>
-                  <td className="w-[20%] py-4 text-center">
+                  <td className="px-3 py-3 sm:py-4 text-center">
                     <span
                       className={`
-                      inline-flex items-center px-3 py-1 rounded-full text-md font-medium
-                      ${
-                        student.behaviorScore >= 100
-                          ? "bg-green-100 text-green-700"
-                          : student.behaviorScore >= 80
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
-                      }
-                    `}
+                        inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-sm sm:text-md font-medium
+                        ${
+                          student.behaviorScore >= 100
+                            ? "bg-green-100 text-green-700"
+                            : student.behaviorScore >= 80
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-red-100 text-red-700"
+                        }
+                      `}
                     >
                       {student.behaviorScore}
                     </span>
@@ -216,82 +218,62 @@ export default function ClassroomPage() {
           </table>
         </div>
 
+        {/* Pagination */}
         {totalPages > 1 && (
-          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-            <div className="flex flex-1 justify-between sm:hidden">
+          <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 gap-4">
+            <div className="text-sm text-gray-700 text-center sm:text-left">
+              แสดง {(currentPage - 1) * itemsPerPage + 1} ถึง{" "}
+              {Math.min(currentPage * itemsPerPage, students.length)} จากทั้งหมด{" "}
+              {students.length} รายการ
+            </div>
+            
+            <nav className="inline-flex -space-x-px rounded-md shadow-sm">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="relative inline-flex items-center px-4 py-2 text-md font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
               >
-                ก่อนหน้า
+                <ChevronLeftIcon className="h-5 w-5" />
               </button>
-              <button
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              
+              {/* แสดงเฉพาะหน้าที่อยู่ใกล้หน้าปัจจุบัน */}
+              {[...Array(totalPages)].map((_, i) => {
+                const pageNumber = i + 1;
+                const showPage = 
+                  pageNumber === 1 || 
+                  pageNumber === totalPages ||
+                  Math.abs(pageNumber - currentPage) <= 1;
+
+                if (!showPage) {
+                  if (pageNumber === currentPage - 2 || pageNumber === currentPage + 2) {
+                    return <span key={pageNumber} className="px-3 py-2 text-gray-500">...</span>;
+                  }
+                  return null;
                 }
+
+                return (
+                  <button
+                    key={pageNumber}
+                    onClick={() => setCurrentPage(pageNumber)}
+                    className={`relative hidden sm:inline-flex items-center px-4 py-2 text-sm font-semibold ${
+                      currentPage === pageNumber
+                        ? "z-10 bg-orange-600 text-white"
+                        : "text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="relative ml-3 inline-flex items-center px-4 py-2 text-md font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
               >
-                ถัดไป
+                <ChevronRightIcon className="h-5 w-5" />
               </button>
-            </div>
-            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-              <div>
-                <p className="text-md text-gray-700">
-                  แสดง{" "}
-                  <span className="font-medium">
-                    {(currentPage - 1) * itemsPerPage + 1}
-                  </span>{" "}
-                  ถึง{" "}
-                  <span className="font-medium">
-                    {Math.min(currentPage * itemsPerPage, students.length)}
-                  </span>{" "}
-                  จากทั้งหมด{" "}
-                  <span className="font-medium">{students.length}</span> รายการ
-                </p>
-              </div>
-              <div>
-                <nav
-                  className="isolate inline-flex -space-x-px rounded-md shadow-sm"
-                  aria-label="Pagination"
-                >
-                  <button
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
-                    disabled={currentPage === 1}
-                    className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-                  >
-                    <span className="sr-only">Previous</span>
-                    <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
-                  </button>
-                  {[...Array(totalPages)].map((_, i) => (
-                    <button
-                      key={i + 1}
-                      onClick={() => setCurrentPage(i + 1)}
-                      className={`relative inline-flex items-center px-4 py-2 text-md font-semibold ${
-                        currentPage === i + 1
-                          ? "z-10 bg-orange-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
-                          : "text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
-                      }`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                    }
-                    disabled={currentPage === totalPages}
-                    className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-                  >
-                    <span className="sr-only">Next</span>
-                    <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
-                  </button>
-                </nav>
-              </div>
-            </div>
+            </nav>
           </div>
         )}
       </div>

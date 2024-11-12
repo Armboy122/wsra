@@ -50,7 +50,7 @@ export default function MobileMenu({ onHome, onLogout, onSelectRoom }: Props) {
                   onClick={() => onSelectRoom(selectedLevel, i + 1)}
                   className="px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 rounded-lg border border-gray-200"
                 >
-                  {i + 1}
+                  {selectedLevel}/{i + 1}
                 </button>
               ))}
             </div>

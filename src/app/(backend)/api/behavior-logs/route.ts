@@ -75,7 +75,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(behaviors_logs);
   } catch (error) {
-    console.error("เกิดข้อผิดพลาดในการดึงข้อมูลประเภทพฤติกรรม:", error);
+    console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
     return NextResponse.json([], { status: 500 }); // ส่ง empty array แทน error object
   }
 }

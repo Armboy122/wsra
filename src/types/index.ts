@@ -83,3 +83,35 @@ export interface StudentSearchResult {
     name: string;
   };
 }
+
+export interface BehaviorLogTable {
+  id: number;
+  student: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    studentNumber: string;
+  };
+  teacher: {
+    id: number;
+    name: string;
+  };
+  status: 'pending' | 'approved' | 'rejected';
+  description?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  imageUrl?: string;
+  behaviorTypes: Array<{
+    behaviorType: {
+      id: number;
+      name: string;
+      category: string;
+      score: number;
+    }
+  }>;
+}
+
+export type BehaviorLogsActionType = {
+  selectedIds: number[];
+  onUpdateStatus: (ids: number[], status: string) => Promise<void>;
+};

@@ -35,18 +35,16 @@ interface BehaviorType {
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => Promise<void>;
 }
 
-export default function BehaviorLogModal({ isOpen, onClose }: Props) {
+export default function BehaviorLogModal({ isOpen, onClose , onSuccess }: Props) {
   const { data: session } = useSession();
 
   // เรียกใช้ useBehaviors เพื่อดึงข้อมูลพฤติกรรม
-  const { behaviors, loading, error, refetch } = useBehaviors();
-  const [selectedStudent, setSelectedStudent] =
-    useState<StudentSearchResult | null>(null);
-  const [selectedBehaviors, setSelectedBehaviors] = useState<BehaviorType[]>(
-    []
-  );
+  const { behaviors, loading } = useBehaviors();
+  const [selectedStudent, setSelectedStudent] = useState<StudentSearchResult | null>(null);
+  const [selectedBehaviors, setSelectedBehaviors] = useState<BehaviorType[]>([]);
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -55,9 +53,7 @@ export default function BehaviorLogModal({ isOpen, onClose }: Props) {
     if (!selectedStudent || !Array.isArray(selectedBehaviors)) return 0;
 
     const scoreChange = selectedBehaviors.reduce((total, behavior) => {
-      return (
-        total +behavior.score
-      );
+      return total + behavior.score;
     }, 0);
 
     return selectedStudent.behaviorScore + scoreChange;
@@ -92,6 +88,7 @@ export default function BehaviorLogModal({ isOpen, onClose }: Props) {
       toast.success("บันทึกข้อมูลสำเร็จ");
       resetForm();
       onClose();
+      await onSuccess?.();
     } catch (error) {
       console.error("Error submitting data:", error);
       toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
@@ -126,32 +123,38 @@ export default function BehaviorLogModal({ isOpen, onClose }: Props) {
         onClose();
       }}
     >
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-semibold text-gray-800">
             {!selectedStudent ? "เลือกนักเรียน" : "บันทึกพฤติกรรม"}
           </DialogTitle>
         </DialogHeader>
 
         {!selectedStudent ? (
-          <StudentSearch onSelect={(student) => setSelectedStudent(student)} />
+          <div className="py-4">
+            <StudentSearch onSelect={(student) => setSelectedStudent(student)} />
+          </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {/* ข้อมูลนักเรียน */}
-            <div className="p-4 bg-gray-50 rounded-lg flex justify-between items-center">
-              <div>
-                <h3 className="font-bold">
+            <div className="p-4 bg-orange-50 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="space-y-1">
+                <h3 className="text-lg font-semibold text-gray-800">
                   {selectedStudent.firstName} {selectedStudent.lastName}
                 </h3>
-                <p className="text-sm text-gray-600">
-                  เลขประจำตัว: {selectedStudent.studentNumber} | ห้อง:{" "}
-                  {selectedStudent.classroom.name}
-                </p>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+                  <p className="text-sm text-gray-600">
+                    เลขประจำตัว: {selectedStudent.studentNumber}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    ห้อง: {selectedStudent.classroom.name}
+                  </p>
+                </div>
               </div>
-              <div className="text-right">
+              <div className="bg-white p-3 rounded-lg shadow-sm">
                 <div className="text-sm text-gray-600">คะแนนพฤติกรรม</div>
                 <div
-                  className={`font-bold ${
+                  className={`text-xl font-bold ${
                     calculatePreviewScore() >= 80
                       ? "text-green-600"
                       : calculatePreviewScore() >= 50
@@ -165,34 +168,44 @@ export default function BehaviorLogModal({ isOpen, onClose }: Props) {
             </div>
 
             {/* เลือกพฤติกรรม */}
-            <BehaviorSelection
-              behaviors={[...behaviors.positive, ...behaviors.negative]}
-              loading={loading}
-              onSelect={handleSelectBehavior}
-            />
+            <div className="space-y-3">
+              <h4 className="font-medium text-gray-700">เลือกพฤติกรรม</h4>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <BehaviorSelection
+                  behaviors={[...behaviors.positive, ...behaviors.negative]}
+                  loading={loading}
+                  onSelect={handleSelectBehavior}
+                />
+              </div>
+            </div>
 
             {/* แสดงพฤติกรรมที่เลือก */}
-            <SelectedBehaviors
-              behaviors={selectedBehaviors}
-              onRemove={handleRemoveBehavior}
-            />
+            <div className="space-y-3">
+              <h4 className="font-medium text-gray-700">พฤติกรรมที่เลือก</h4>
+              <div className="min-h-[100px] bg-gray-50 p-4 rounded-lg">
+                <SelectedBehaviors
+                  behaviors={selectedBehaviors}
+                  onRemove={handleRemoveBehavior}
+                />
+              </div>
+            </div>
 
             {/* รายละเอียดเพิ่มเติม */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
                 รายละเอียดเพิ่มเติม
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-2 border rounded"
+                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
                 rows={3}
                 placeholder="ระบุรายละเอียดเพิ่มเติม (ถ้ามี)"
               />
             </div>
 
             {/* ปุ่มดำเนินการ */}
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-end gap-3 pt-4 border-t">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -200,14 +213,23 @@ export default function BehaviorLogModal({ isOpen, onClose }: Props) {
                   onClose();
                 }}
                 disabled={saving}
+                className="w-24"
               >
                 ยกเลิก
               </Button>
               <Button
                 onClick={handleSubmit}
                 disabled={selectedBehaviors.length === 0 || saving}
+                className="w-24 bg-orange-500 hover:bg-orange-600"
               >
-                {saving ? "กำลังบันทึก..." : "บันทึก"}
+                {saving ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>บันทึก</span>
+                  </div>
+                ) : (
+                  "บันทึก"
+                )}
               </Button>
             </div>
           </div>
