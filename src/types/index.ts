@@ -1,19 +1,3 @@
-import {
-  Teacher,
-  Classroom,
-  Student,
-  BehaviorLog,
-  BehaviorLogBehavior,
-} from "@prisma/client";
-
-export type {
-  Teacher,
-  Classroom,
-  Student,
-  BehaviorLog,
-  BehaviorLogBehavior,
-};
-
 export type BehaviorCategory = "positive" | "negative";
 
 export type ApprovalStatus = "pending" | "approved" | "rejected";
@@ -96,7 +80,7 @@ export interface BehaviorLogTable {
     id: number;
     name: string;
   };
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   description?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -107,7 +91,7 @@ export interface BehaviorLogTable {
       name: string;
       category: string;
       score: number;
-    }
+    };
   }>;
 }
 

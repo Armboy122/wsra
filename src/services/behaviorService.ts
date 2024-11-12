@@ -1,9 +1,9 @@
 import prisma from "@/lib/prisma";
 import {
-  BehaviorLog,
   BehaviorLogWithDetails,
   CreateBehaviorLogInput,
 } from "@/types";
+
 
 export async function getBehaviorTypes(category: string) {
   try {
@@ -171,15 +171,15 @@ export async function getBehaviorLogsByStudent(
 }
 
 // อัพเดทสถานะบันทึกพฤติกรรมเดี่ยว
-export async function updateBehaviorLogStatus(
-  id: number,
-  status: string
-): Promise<BehaviorLog> {
-  return prisma.behaviorLog.update({
-    where: { id },
-    data: { status },
-  });
-}
+// export async function updateBehaviorLogStatus(
+//   id: number,
+//   status: string
+// ): Promise<BehaviorLog> {
+//   return prisma.behaviorLog.update({
+//     where: { id },
+//     data: { status },
+//   });
+// }
 
 // อัพเดทสถานะบันทึกพฤติกรรมหลายรายการ
 export async function updateMultipleBehaviorLogStatus(
