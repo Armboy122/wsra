@@ -20,7 +20,7 @@ export default function LoginPage() {
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/teacher')
+        const response = await fetch('/api/teacher')
         const data = await response.json()
         setTeachers(data)
       } catch (error) {
