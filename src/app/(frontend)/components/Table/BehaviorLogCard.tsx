@@ -83,14 +83,14 @@ export function BehaviorLogCard({
           </div>
         )}
 
-        <div>
+        {/* <div>
           <span className="text-sm text-gray-500">วันที่:</span>
           <span className="ml-2">
             {format(new Date(log.createdAt), "d MMM yyyy HH:mm", {
               locale: th,
             })}
           </span>
-        </div>
+        </div> */}
       </div>
     </div>
   );

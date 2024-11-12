@@ -130,7 +130,7 @@ export function BehaviorSelection({ behaviors, onSelect, loading }: Props) {
            {/* กรณีไม่พบผลการค้นหา */}
            {filteredBehaviors.length === 0 && searchTerm && (
              <div className="p-4 text-center text-gray-500">
-               ไม่พบพฤติกรรมที่ตรงกับ "{searchTerm}"
+               ไม่พบพฤติกรรมที่ตรงกับ {searchTerm};
              </div>
            )}
          </div>

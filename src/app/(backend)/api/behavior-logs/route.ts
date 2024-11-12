@@ -69,7 +69,7 @@ export async function PATCH(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const behaviors_logs = await getBehavior_logs();
 

@@ -16,14 +16,19 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
+} from "@/components/ui/pagination";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
-import { th } from "date-fns/locale";
 import { BehaviorLogTable } from "@/types";
 import { BehaviorLogsFilters } from "./BehaviorLogsFilters";
 import { BehaviorLogCard } from "./BehaviorLogCard";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface BehaviorLogsTableProps {
   logs: BehaviorLogTable[];
@@ -34,7 +39,7 @@ interface BehaviorLogsTableProps {
   itemsPerPage: number;
   onPageChange: (page: number) => void;
   onStatusChange: (status: string) => void;
-  onDateSort: (direction: 'asc' | 'desc') => void;
+  onDateSort: (direction: "asc" | "desc") => void;
 }
 
 export function BehaviorLogsTable({
@@ -59,7 +64,7 @@ export function BehaviorLogsTable({
     const halfShow = Math.floor(showPages / 2);
 
     let startPage = Math.max(currentPage - halfShow, 1);
-    let endPage = Math.min(startPage + showPages - 1, totalPages);
+    const endPage = Math.min(startPage + showPages - 1, totalPages);
 
     if (endPage - startPage + 1 < showPages) {
       startPage = Math.max(endPage - showPages + 1, 1);
@@ -67,7 +72,7 @@ export function BehaviorLogsTable({
 
     if (startPage > 1) {
       items.push(1);
-      if (startPage > 2) items.push('ellipsis');
+      if (startPage > 2) items.push("ellipsis");
     }
 
     for (let i = startPage; i <= endPage; i++) {
@@ -75,7 +80,7 @@ export function BehaviorLogsTable({
     }
 
     if (endPage < totalPages) {
-      if (endPage < totalPages - 1) items.push('ellipsis');
+      if (endPage < totalPages - 1) items.push("ellipsis");
       items.push(totalPages);
     }
 
@@ -85,25 +90,28 @@ export function BehaviorLogsTable({
   const TablePagination = () => (
     <div className="flex items-center justify-between px-2">
       <div className="text-sm text-gray-700">
-        แสดง {(currentPage - 1) * itemsPerPage + 1} ถึง{' '}
-        {Math.min(currentPage * itemsPerPage, totalItems)} จากทั้งหมด {totalItems} รายการ
+        แสดง {(currentPage - 1) * itemsPerPage + 1} ถึง{" "}
+        {Math.min(currentPage * itemsPerPage, totalItems)} จากทั้งหมด{" "}
+        {totalItems} รายการ
       </div>
       <Pagination>
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious 
-              href="#" 
+            <PaginationPrevious
+              href="#"
               onClick={(e) => {
                 e.preventDefault();
                 if (currentPage > 1) onPageChange(currentPage - 1);
               }}
-              className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+              className={
+                currentPage === 1 ? "pointer-events-none opacity-50" : ""
+              }
             />
           </PaginationItem>
 
           {getPaginationItems().map((item, index) => (
             <PaginationItem key={index}>
-              {item === 'ellipsis' ? (
+              {item === "ellipsis" ? (
                 <PaginationEllipsis />
               ) : (
                 <PaginationLink
@@ -127,7 +135,11 @@ export function BehaviorLogsTable({
                 e.preventDefault();
                 if (currentPage < totalPages) onPageChange(currentPage + 1);
               }}
-              className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+              className={
+                currentPage === totalPages
+                  ? "pointer-events-none opacity-50"
+                  : ""
+              }
             />
           </PaginationItem>
         </PaginationContent>
@@ -138,25 +150,6 @@ export function BehaviorLogsTable({
   if (isMobile) {
     return (
       <div className="space-y-6">
-        {/* Status Summary Cards */}
-        <div className="grid grid-cols-1 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
-            <div className="text-sm text-gray-500">รายการทั้งหมด</div>
-            <div className="text-2xl font-semibold text-gray-800">{totalItems}</div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
-            <div className="text-sm text-gray-500">อนุมัติแล้ว</div>
-            <div className="text-2xl font-semibold text-gray-800">
-              {logs.filter(log => log.status === 'approved').length}
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-yellow-500">
-            <div className="text-sm text-gray-500">รออนุมัติ</div>
-            <div className="text-2xl font-semibold text-gray-800">
-              {logs.filter(log => log.status === 'pending').length}
-            </div>
-          </div>
-        </div>
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
           <div className="border-b border-gray-200 bg-gray-50/50 p-4">
@@ -165,7 +158,7 @@ export function BehaviorLogsTable({
               onDateSort={onDateSort}
             />
           </div>
-          
+
           <div className="p-4 space-y-4">
             {logs.map((log) => (
               <BehaviorLogCard
@@ -188,8 +181,6 @@ export function BehaviorLogsTable({
 
   return (
     <div className="space-y-6">
-
-
       {/* Filters & Table */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
         <div className="border-b border-gray-200 bg-gray-50/50 p-4">
@@ -198,13 +189,13 @@ export function BehaviorLogsTable({
             onDateSort={onDateSort}
           />
         </div>
-        
+
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50/80">
                 {session?.user?.role === "Admin" && (
-                  <TableHead className="w-12">
+                  <TableHead className="w-[5%]">
                     <Checkbox
                       checked={
                         logs.length > 0 &&
@@ -220,17 +211,26 @@ export function BehaviorLogsTable({
                     />
                   </TableHead>
                 )}
-                <TableHead className="font-medium text-gray-700">นักเรียน</TableHead>
-                <TableHead className="font-medium text-gray-700">ครูผู้บันทึก</TableHead>
-                <TableHead className="font-medium text-gray-700">พฤติกรรม</TableHead>
-                <TableHead className="font-medium text-gray-700">สถานะ</TableHead>
-                <TableHead className="font-medium text-gray-700">วันที่</TableHead>
-                <TableHead className="font-medium text-gray-700">รายละเอียด</TableHead>
+                <TableHead className="w-[25%] font-medium text-gray-700">
+                  นักเรียน
+                </TableHead>
+                <TableHead className="w-[20%] font-medium text-gray-700">
+                  ครูผู้บันทึก
+                </TableHead>
+                <TableHead className="w-[20%] font-medium text-gray-700">
+                  พฤติกรรม
+                </TableHead>
+                <TableHead className="w-[15%] font-medium text-gray-700">
+                  รายละเอียด
+                </TableHead>
+                <TableHead className="w-[15%] font-medium text-gray-700">
+                  สถานะ
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {logs.map((log) => (
-                <TableRow 
+                <TableRow
                   key={log.id}
                   className="hover:bg-blue-50/30 transition-colors"
                 >
@@ -252,22 +252,72 @@ export function BehaviorLogsTable({
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-gray-700">{log.teacher.name}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {log.behaviorTypes.map((bt) => (
-                        <Badge
-                          key={bt.behaviorType.id}
-                          variant={
-                            bt.behaviorType.category === "positive"
-                              ? "success"
-                              : "destructive"
-                          }
-                        >
-                          {bt.behaviorType.name} ({bt.behaviorType.score})
-                        </Badge>
-                      ))}
-                    </div>
+                  <TableCell className="text-gray-700">
+                    {log.teacher.name}
+                  </TableCell>
+                  <TableCell className="max-w-md">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div className="flex flex-wrap gap-1 cursor-pointer">
+                          {log.behaviorTypes.slice(0, 1).map((bt) => (
+                            <Badge
+                              key={bt.behaviorType.id}
+                              variant={
+                                bt.behaviorType.category === "positive"
+                                  ? "success"
+                                  : "destructive"
+                              }
+                            >
+                              {bt.behaviorType.name}
+                            </Badge>
+                          ))}
+                          {log.behaviorTypes.length > 1 && (
+                            <Badge variant="outline">
+                              ดูทั้งหมด ({log.behaviorTypes.length})
+                            </Badge>
+                          )}
+                        </div>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>รายการพฤติกรรมทั้งหมด</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-2">
+                          {log.behaviorTypes.map((bt) => (
+                            <div
+                              key={bt.behaviorType.id}
+                              className="flex justify-between items-center p-2 rounded-lg hover:bg-gray-50"
+                            >
+                              <span>{bt.behaviorType.name}</span>
+                              <Badge
+                                variant={
+                                  bt.behaviorType.category === "positive"
+                                    ? "success"
+                                    : "destructive"
+                                }
+                              >
+                                {bt.behaviorType.score}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </TableCell>
+                  <TableCell className="text-gray-600 max-w-xs">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <div className="cursor-pointer truncate">
+                          {log.description}
+                        </div>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>รายละเอียด</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-2 p-4">{log.description}</div>
+                      </DialogContent>
+                    </Dialog>
                   </TableCell>
                   <TableCell>
                     <Badge
@@ -286,20 +336,12 @@ export function BehaviorLogsTable({
                         : "รออนุมัติ"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-gray-600">
-                    {format(new Date(log.createdAt), "d MMM yyyy HH:mm", {
-                      locale: th,
-                    })}
-                  </TableCell>
-                  <TableCell className="text-gray-600 max-w-xs truncate">
-                    {log.description}
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
-        
+
         <div className="border-t border-gray-200 bg-gray-50/50 p-4">
           <TablePagination />
         </div>

@@ -39,7 +39,7 @@ export function useBehaviors() {
       });
     } catch (error) {
       setBehaviors({ positive: [], negative: [] });
-      toast.error("ไม่สามารถดึงข้อมูลพฤติกรรมได้");
+      toast.error("ไม่สามารถดึงข้อมูลพฤติกรรมได้",error);
     } finally {
       setLoading(false);
     }

@@ -33,6 +33,7 @@ export function useBehaviorLogs(params?: UseBehaviorLogsParams) {
       setLogs(data);
     } catch (err) {
       setError('Failed to fetch logs');
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -69,7 +70,6 @@ export function useBehaviorLogs(params?: UseBehaviorLogsParams) {
 
   // Calculate pagination
   const totalItems = filteredAndSortedLogs.length;
-  const totalPages = Math.ceil(totalItems / limit);
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + limit;
   const paginatedLogs = filteredAndSortedLogs.slice(startIndex, endIndex);

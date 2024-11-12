@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "react-hot-toast";
 import { BehaviorLogsActionType } from "@/types";
-import { se } from "date-fns/locale";
 
 export function BehaviorLogsActions({ 
   selectedIds, 
@@ -21,7 +20,7 @@ export function BehaviorLogsActions({
       toast.success(`อัพเดตสถานะสำเร็จ ${selectedIds.length} รายการ`);
       onSuccess?.();
     } catch (error) {
-      toast.error("เกิดข้อผิดพลาดในการอัพเดตสถานะ");
+      toast.error("เกิดข้อผิดพลาดในการอัพเดตสถานะ",error);
     }
   };
 
