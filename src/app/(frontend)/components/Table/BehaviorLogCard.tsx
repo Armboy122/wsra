@@ -1,8 +1,6 @@
 import { BehaviorLogTable } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { format } from "date-fns";
-import { th } from "date-fns/locale";
 
 interface BehaviorLogCardProps {
   log: BehaviorLogTable;

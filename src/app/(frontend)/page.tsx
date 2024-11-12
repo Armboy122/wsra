@@ -1,7 +1,7 @@
-'use client'
-import { useSession } from "next-auth/react"
+"use client";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "react-hot-toast";
 import BehaviorLogModal from "./components/BehaviorLog/BehaviorLogModal";
@@ -9,16 +9,18 @@ import { useBehaviorLogs } from "@/hooks/useBehaviorLogsTable";
 import { useBehaviorLogsActions } from "@/hooks/useBehaviorLogsActions";
 import { BehaviorLogsActions } from "./components/Table/BehaviorLogsActions";
 import { BehaviorLogsTable } from "./components/Table/BehaviorLogsTable";
+import DashboardStats from "./components/DashboardStats";
+import { PlusCircle } from "lucide-react";
 
 export default function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  
+
   // State management
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [dateSort, setDateSort] = useState<'desc' | 'asc'>('desc');
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateSort, setDateSort] = useState<"desc" | "asc">("desc");
 
   const {
     logs,
@@ -28,19 +30,19 @@ export default function Home() {
     selectedIds,
     toggleSelection,
     clearSelection,
-    refetch
+    refetch,
   } = useBehaviorLogs({
     page: currentPage,
     limit: 10,
     status: statusFilter,
-    sortOrder: dateSort
+    sortOrder: dateSort,
   });
-  
+
   const { updateStatus } = useBehaviorLogsActions();
 
   useEffect(() => {
     if (status === "unauthenticated" || !session) {
-      router.push("/login")
+      router.push("/login");
     }
   }, [status, session, router]);
 
@@ -56,7 +58,7 @@ export default function Home() {
     clearSelection();
   };
 
-  const handleDateSort = (direction: 'asc' | 'desc') => {
+  const handleDateSort = (direction: "asc" | "desc") => {
     setDateSort(direction);
     clearSelection();
   };
@@ -86,14 +88,21 @@ export default function Home() {
   if (!session) return null;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold mb-4 sm:mb-0">บันทึกพฤติกรรม</h1>
+    <div className="container mx-auto px-4 ">
+      <DashboardStats />
+      <div className="flex flex-col sm:flex-row mt-2 justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold mb-4 sm:mb-0">รายการพฤติกรรม</h1>
         <div className="flex gap-2">
-          <Button onClick={() => setIsModalOpen(true)}>
-            บันทึกพฤติกรรม
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            variant="default"
+            size="default"
+            className="w-full gap-2 font-medium bg-blue-600 hover:bg-blue-700 active:scale-[0.98] h-12"
+          >
+            <PlusCircle className="w-5 h-5" />
+            เพิ่มข้อมูลพฤติกรรมนักเรียน
           </Button>
-          {session.user.role === 'Admin' && selectedIds.length > 0 && (
+          {session.user.role === "Admin" && selectedIds.length > 0 && (
             <BehaviorLogsActions
               selectedIds={selectedIds}
               onUpdateStatus={updateStatus}

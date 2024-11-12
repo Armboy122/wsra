@@ -9,6 +9,23 @@ import {
   ArrowDownIcon,
 } from "@heroicons/react/24/outline";
 import ExportExcelButton from "../../components/ExportExcelButton";
+import toast from "react-hot-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useSession } from "next-auth/react";
 
 interface Student {
   id: number;
@@ -23,13 +40,23 @@ interface Student {
   };
 }
 
+interface BehaviorType {
+  id: number;
+  name: string;
+  score: number;
+}
+
 export default function ClassroomPage() {
   const params = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [classroom, setClassroom] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
+  const [behaviors, setBehaviors] = useState<BehaviorType[]>([]);
+  const [selectedBehavior, setSelectedBehavior] = useState<string>("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -95,6 +122,67 @@ export default function ClassroomPage() {
     fetchStudents();
   }, [params.classroomid]);
 
+  // เพิ่มฟังก์ชันดึงข้อมูลพฤติกรรม
+  const fetchBehaviors = async () => {
+    try {
+      const res = await fetch("/api/behaviors?category=positive");
+      const data = await res.json();
+      setBehaviors(data);
+    } catch (error) {
+      console.error("Error fetching behaviors:", error);
+    }
+  };
+
+  // เพิ่มฟังก์ชันอัพเดตคะแนน
+  const handleUpdateScores = async () => {
+    if (!selectedBehavior) {
+      toast.error("กรุณาเลือกพฤติกรรม");
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+      const behavior = behaviors.find(
+        (b) => b.id.toString() === selectedBehavior
+      );
+
+      const response = await fetch("/api/students", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          classroomId: parseInt(params.classroomid as string),
+          scoreChange: behavior?.score || 0,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update scores");
+
+      // รีเฟรชข้อมูลนักเรียน
+      const updatedStudentsRes = await fetch(
+        `/api/students?classroomId=${params.classroomid}`
+      );
+      const updatedStudents = await updatedStudentsRes.json();
+      setStudents(
+        Array.isArray(updatedStudents) ? updatedStudents : [updatedStudents]
+      );
+
+      toast.success("อัพเดตคะแนนสำเร็จ");
+      setSelectedBehavior("");
+    } catch (error) {
+      console.error("Error updating scores:", error);
+      toast.error("เกิดข้อผิดพลาดในการอัพเดตคะแนน");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // เพิ่ม useEffect สำหรับดึงข้อมูลพฤติกรรม
+  useEffect(() => {
+    fetchBehaviors();
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-[400px] flex items-center justify-center">
@@ -136,6 +224,60 @@ export default function ClassroomPage() {
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
           <ExportExcelButton students={students} classroom={classroom} />
+          {session?.user?.role === "Admin" && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="default"
+                  className=" bg-blue-600 hover:bg-blue-700"
+                >
+                  เพิ่มคะแนนทั้งห้อง
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>เพิ่มคะแนนทั้งห้อง</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">เลือกพฤติกรรม</label>
+                    <Select
+                      value={selectedBehavior}
+                      onValueChange={setSelectedBehavior}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="เลือกพฤติกรรม" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {behaviors.map((behavior) => (
+                          <SelectItem
+                            key={behavior.id}
+                            value={behavior.id.toString()}
+                          >
+                            {behavior.name} (+{behavior.score})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex justify-end gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => setSelectedBehavior("")}
+                    >
+                      ยกเลิก
+                    </Button>
+                    <Button
+                      onClick={handleUpdateScores}
+                      disabled={isUpdating || !selectedBehavior}
+                    >
+                      {isUpdating ? "กำลังอัพเดต..." : "บันทึก"}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
           <div className="bg-orange-100 px-4 py-2 rounded-lg text-center">
             <span className="text-orange-600 font-medium text-sm sm:text-base">
               จำนวนนักเรียน: {students.length} คน
@@ -226,7 +368,7 @@ export default function ClassroomPage() {
               {Math.min(currentPage * itemsPerPage, students.length)} จากทั้งหมด{" "}
               {students.length} รายการ
             </div>
-            
+
             <nav className="inline-flex -space-x-px rounded-md shadow-sm">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -235,18 +377,28 @@ export default function ClassroomPage() {
               >
                 <ChevronLeftIcon className="h-5 w-5" />
               </button>
-              
+
               {/* แสดงเฉพาะหน้าที่อยู่ใกล้หน้าปัจจุบัน */}
               {[...Array(totalPages)].map((_, i) => {
                 const pageNumber = i + 1;
-                const showPage = 
-                  pageNumber === 1 || 
+                const showPage =
+                  pageNumber === 1 ||
                   pageNumber === totalPages ||
                   Math.abs(pageNumber - currentPage) <= 1;
 
                 if (!showPage) {
-                  if (pageNumber === currentPage - 2 || pageNumber === currentPage + 2) {
-                    return <span key={pageNumber} className="px-3 py-2 text-gray-500">...</span>;
+                  if (
+                    pageNumber === currentPage - 2 ||
+                    pageNumber === currentPage + 2
+                  ) {
+                    return (
+                      <span
+                        key={pageNumber}
+                        className="px-3 py-2 text-gray-500"
+                      >
+                        ...
+                      </span>
+                    );
                   }
                   return null;
                 }
@@ -267,7 +419,9 @@ export default function ClassroomPage() {
               })}
 
               <button
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
               >
