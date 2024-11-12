@@ -2,18 +2,8 @@
 import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url)
-    const startDate = searchParams.get('startDate')
-    const endDate = searchParams.get('endDate')
-
-    const dateFilter = {
-      createdAt: {
-        gte: startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 30)),
-        lte: endDate ? new Date(endDate) : new Date()
-      }
-    }
 
     // ดึงข้อมูลทั้งหมดพร้อมกัน
     const [statusCounts, topBehaviors] = await Promise.all([
