@@ -123,7 +123,7 @@ export default function BehaviorLogModal({ isOpen, onClose , onSuccess }: Props)
         onClose();
       }}
     >
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl sm:text-2xl font-semibold text-gray-800">
             {!selectedStudent ? "เลือกนักเรียน" : "บันทึกพฤติกรรม"}
@@ -131,11 +131,11 @@ export default function BehaviorLogModal({ isOpen, onClose , onSuccess }: Props)
         </DialogHeader>
 
         {!selectedStudent ? (
-          <div className="py-4">
+          <div className="p-4 bg-orange-50 rounded-lg">
             <StudentSearch onSelect={(student) => setSelectedStudent(student)} />
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="flex-1">
             {/* ข้อมูลนักเรียน */}
             <div className="p-4 bg-orange-50 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="space-y-1">

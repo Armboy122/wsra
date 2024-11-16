@@ -28,51 +28,73 @@ export async function getBehaviorTypes(category: string) {
     return [];
   }
 }
-export async function getBehavior_logs() {
-  try {
-    const behaviors = await prisma.behaviorLog.findMany({
-      include: {
-        student: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            studentNumber: true,
-            classroom: {
-              select: {
-                name: true
-              }
-            }
-          }
-        },
-        teacher: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        behaviorTypes: {
-          include: {
-            behaviorType: {
-              select: {
-                id: true,
-                name: true,
-                category: true,
-                score: true
-              }
-            }
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc' // เรียงจากใหม่ไปเก่า
-      }
-    });
 
-    return behaviors;
+
+interface GetBehaviorLogsParams {
+  page: number;
+  limit: number;
+  status: string;
+  sortOrder: 'asc' | 'desc';
+}
+export async function getBehavior_logs({ 
+  page, 
+  limit, 
+  status, 
+  sortOrder 
+}: GetBehaviorLogsParams) {
+  try {
+    const where = status !== 'all' ? { status } : {};
+
+    const [behaviors, total] = await Promise.all([
+      prisma.behaviorLog.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        where,
+        include: {
+          student: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              studentNumber: true,
+              classroom: {
+                select: {
+                  name: true
+                }
+              }
+            }
+          },
+          teacher: {
+            select: {
+              id: true,
+              name: true
+            }
+          },
+          behaviorTypes: {
+            include: {
+              behaviorType: {
+                select: {
+                  id: true,
+                  name: true,
+                  category: true,
+                  score: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: {
+          createdAt: sortOrder
+        }
+      }),
+      prisma.behaviorLog.count({ where })
+    ]);
+
+    return { behaviors, total };
+    
   } catch (error) {
     console.error("Error in getBehaviorLogs:", error);
-    return [];
+    throw error; // ส่ง error ไปให้ API route จัดการ
   }
 }
 

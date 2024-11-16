@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react'; // เพิ่ม useCallback
 import { BehaviorLogTable } from '@/types';
 
 interface UseBehaviorLogsParams {
@@ -11,6 +11,7 @@ interface UseBehaviorLogsParams {
 
 export function useBehaviorLogs(params?: UseBehaviorLogsParams) {
   const [logs, setLogs] = useState<BehaviorLogTable[]>([]);
+  const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -21,23 +22,38 @@ export function useBehaviorLogs(params?: UseBehaviorLogsParams) {
   const status = params?.status || 'all';
   const sortOrder = params?.sortOrder || 'desc';
 
-  useEffect(() => {
-    fetchLogs();
-  }, []);
-
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/behavior-logs');
+      
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        status,
+        sortOrder
+      });
+
+      const response = await fetch(`/api/behavior-logs?${queryParams}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch logs');
+      }
+      
       const data = await response.json();
-      setLogs(data);
+      setLogs(data.logs);
+      setTotalItems(data.total);
+      
     } catch (err) {
+      console.error('Error fetching logs:', err);
       setError('Failed to fetch logs');
-      console.log(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, limit, status, sortOrder]); // dependencies ที่ใช้ใน fetchLogs
+
+  useEffect(() => {
+    fetchLogs();
+  }, [fetchLogs]);
 
   const toggleSelection = (id: number) => {
     setSelectedIds(prev => 
@@ -49,33 +65,8 @@ export function useBehaviorLogs(params?: UseBehaviorLogsParams) {
 
   const clearSelection = () => setSelectedIds([]);
 
-  // Filter and sort logs
-  const filteredAndSortedLogs = useMemo(() => {
-    let result = [...logs];
-
-    // Filter by status
-    if (status !== 'all') {
-      result = result.filter(log => log.status === status);
-    }
-
-    // Sort by date
-    result.sort((a, b) => {
-      const dateA = new Date(a.createdAt).getTime();
-      const dateB = new Date(b.createdAt).getTime();
-      return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
-    });
-
-    return result;
-  }, [logs, status, sortOrder]);
-
-  // Calculate pagination
-  const totalItems = filteredAndSortedLogs.length;
-  const startIndex = (page - 1) * limit;
-  const endIndex = startIndex + limit;
-  const paginatedLogs = filteredAndSortedLogs.slice(startIndex, endIndex);
-
   return {
-    logs: paginatedLogs,
+    logs,
     totalItems,
     loading,
     error,

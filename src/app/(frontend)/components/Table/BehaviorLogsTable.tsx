@@ -88,14 +88,17 @@ export function BehaviorLogsTable({
   };
 
   const TablePagination = () => (
-    <div className="flex items-center justify-between px-2">
-      <div className="text-sm text-gray-700">
+    <div className="flex flex-col gap-4 px-2 sm:flex-row sm:items-center sm:justify-between">
+      {/* Mobile: ข้อความแสดงจำนวนรายการอยู่บน, Desktop: อยู่ซ้าย */}
+      <div className="text-center text-sm text-gray-700 sm:text-left">
         แสดง {(currentPage - 1) * itemsPerPage + 1} ถึง{" "}
         {Math.min(currentPage * itemsPerPage, totalItems)} จากทั้งหมด{" "}
         {totalItems} รายการ
       </div>
-      <Pagination>
-        <PaginationContent>
+  
+      {/* Pagination Controls */}
+      <Pagination className="self-center sm:self-auto">
+        <PaginationContent className="flex-wrap gap-1">
           <PaginationItem>
             <PaginationPrevious
               href="#"
@@ -103,14 +106,15 @@ export function BehaviorLogsTable({
                 e.preventDefault();
                 if (currentPage > 1) onPageChange(currentPage - 1);
               }}
-              className={
+              className={`h-9 px-2 sm:px-4 ${
                 currentPage === 1 ? "pointer-events-none opacity-50" : ""
-              }
+              }`}
             />
           </PaginationItem>
-
+  
+          {/* Hide some page numbers on mobile */}
           {getPaginationItems().map((item, index) => (
-            <PaginationItem key={index}>
+            <PaginationItem key={index} className="hidden sm:list-item">
               {item === "ellipsis" ? (
                 <PaginationEllipsis />
               ) : (
@@ -121,13 +125,21 @@ export function BehaviorLogsTable({
                     onPageChange(item as number);
                   }}
                   isActive={currentPage === item}
+                  className="h-9 w-9"
                 >
                   {item}
                 </PaginationLink>
               )}
             </PaginationItem>
           ))}
-
+  
+          {/* Show simplified version on mobile */}
+          <PaginationItem className="sm:hidden">
+            <span className="flex h-9 items-center justify-center px-2 text-sm">
+              {currentPage} / {totalPages}
+            </span>
+          </PaginationItem>
+  
           <PaginationItem>
             <PaginationNext
               href="#"
@@ -135,11 +147,9 @@ export function BehaviorLogsTable({
                 e.preventDefault();
                 if (currentPage < totalPages) onPageChange(currentPage + 1);
               }}
-              className={
-                currentPage === totalPages
-                  ? "pointer-events-none opacity-50"
-                  : ""
-              }
+              className={`h-9 px-2 sm:px-4 ${
+                currentPage === totalPages ? "pointer-events-none opacity-50" : ""
+              }`}
             />
           </PaginationItem>
         </PaginationContent>
@@ -150,7 +160,6 @@ export function BehaviorLogsTable({
   if (isMobile) {
     return (
       <div className="space-y-6">
-
         <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
           <div className="border-b border-gray-200 bg-gray-50/50 p-4">
             <BehaviorLogsFilters
@@ -326,14 +335,18 @@ export function BehaviorLogsTable({
                           ? "success"
                           : log.status === "rejected"
                           ? "destructive"
-                          : "secondary"
+                          : log.status === "pending"  // เพิ่มเงื่อนไขสำหรับ pending
+                          ? "secondary"
+                          : "secondary"  // default fallback
                       }
                     >
                       {log.status === "approved"
                         ? "อนุมัติแล้ว"
                         : log.status === "rejected"
                         ? "ปฏิเสธ"
-                        : "รออนุมัติ"}
+                        : log.status === "pending" // เพิ่มเงื่อนไขสำหรับ pending
+                        ? "รออนุมัติ"
+                        : "รออนุมัติ"}{" "}
                     </Badge>
                   </TableCell>
                 </TableRow>

@@ -69,13 +69,33 @@ export async function PATCH(req: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const behaviors_logs = await getBehavior_logs();
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const status = searchParams.get('status') || 'all';
+    const sortOrder = (searchParams.get('sortOrder') || 'desc') as 'asc' | 'desc';
 
-    return NextResponse.json(behaviors_logs);
+    const { behaviors, total } = await getBehavior_logs({
+      page,
+      limit,
+      status,
+      sortOrder
+    });
+
+    return NextResponse.json({
+      logs: behaviors,
+      total,
+      page,
+      limit
+    });
+    
   } catch (error) {
     console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
-    return NextResponse.json([], { status: 500 }); // ส่ง empty array แทน error object
+    return NextResponse.json(
+      { error: "เกิดข้อผิดพลาดในการดึงข้อมูล" }, 
+      { status: 500 }
+    );
   }
 }
