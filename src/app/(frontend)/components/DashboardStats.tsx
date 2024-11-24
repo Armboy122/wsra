@@ -22,25 +22,28 @@ interface DashboardData {
   }[]
 }
 
-export default function DashboardStats() {
+export default function DashboardStats({ triggerRefetch }: { triggerRefetch: boolean }) {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('/api/status')
-        const result = await response.json()
-        setData(result)
-      } catch (error) {
-        console.error('Error fetching data:', error)
-      } finally {
-        setLoading(false)
-      }
+  const fetchData = async () => {
+    try {
+      const response = await fetch('/api/status', {
+        method: 'GET',
+        cache: 'no-store', // บังคับปิด Cache
+      }); // ปิด cache เพื่อดึงข้อมูลใหม่เสมอ
+      const result = await response.json()
+      setData(result)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     fetchData()
-  }, [])
+  }, [triggerRefetch]) // เรียก fetchData ใหม่เมื่อ triggerRefetch เปลี่ยน
 
   if (loading) {
     return <div>Loading...</div>
@@ -104,9 +107,6 @@ export default function DashboardStats() {
           ))}
         </div>
       </div>
-
-      {/* สถิติรายวัน (ถ้าต้องการแสดงในรูปแบบตาราง) */}
-      
     </div>
   )
 }

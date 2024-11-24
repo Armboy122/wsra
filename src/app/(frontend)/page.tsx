@@ -21,6 +21,10 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateSort, setDateSort] = useState<"desc" | "asc">("desc");
+  const [triggerRefetch, setTriggerRefetch] = useState(false);
+  const handleDataChange = () => {
+    setTriggerRefetch((prev) => !prev); // Trigger fetch ใหม่
+  };
 
   const {
     logs,
@@ -89,7 +93,7 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 ">
-      <DashboardStats />
+      <DashboardStats triggerRefetch={triggerRefetch} />
       <div className="flex flex-col sm:flex-row mt-2 justify-between items-center mb-6">
         <h1 className="text-2xl font-bold mb-4 sm:mb-0">รายการพฤติกรรม</h1>
         <div className="flex gap-2">
@@ -127,7 +131,10 @@ export default function Home() {
       <BehaviorLogModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSuccess={refetch}
+        onSuccess={async() => {
+          refetch(); // อัปเดตตาราง
+          handleDataChange(); // อัปเดต DashboardStats
+        }}
       />
 
       <Toaster position="top-right" />

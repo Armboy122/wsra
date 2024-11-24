@@ -60,42 +60,43 @@ export default function BehaviorLogModal({ isOpen, onClose , onSuccess }: Props)
   };
 
   // บันทึกข้อมูล
-  const handleSubmit = async () => {
-    if (!selectedStudent || selectedBehaviors.length === 0) return;
+const handleSubmit = async () => {
+  if (!selectedStudent || selectedBehaviors.length === 0) return;
 
-    if (!session || !session.user?.id) {
-      toast.error("ไม่พบข้อมูลผู้ใช้งาน");
-      return;
-    }
+  if (!session || !session.user?.id) {
+    toast.error("ไม่พบข้อมูลผู้ใช้งาน");
+    return;
+  }
 
-    setSaving(true);
-    try {
-      const response = await fetch("/api/behavior-logs", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          studentId: selectedStudent.id,
-          behaviorTypeIds: selectedBehaviors.map((b) => b.id),
-          teacherId: parseInt(session.user.id),
-          description,
-        }),
-      });
+  setSaving(true);
+  try {
+    const response = await fetch("/api/behavior-logs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        studentId: selectedStudent.id,
+        behaviorTypeIds: selectedBehaviors.map((b) => b.id),
+        teacherId: parseInt(session.user.id),
+        description,
+      }),
+    });
 
-      if (!response.ok) throw new Error("บันทึกข้อมูลไม่สำเร็จ");
+    if (!response.ok) throw new Error("บันทึกข้อมูลไม่สำเร็จ");
 
-      toast.success("บันทึกข้อมูลสำเร็จ");
-      resetForm();
-      onClose();
-      await onSuccess?.();
-    } catch (error) {
-      console.error("Error submitting data:", error);
-      toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-    } finally {
-      setSaving(false);
-    }
-  };
+    toast.success("บันทึกข้อมูลสำเร็จ");
+    resetForm();
+    onClose();
+    await onSuccess?.(); // เรียก onSuccess เมื่อสำเร็จ
+  } catch (error) {
+    console.error("Error submitting data:", error);
+    toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+  } finally {
+    setSaving(false);
+  }
+};
+
 
   // ฟังก์ชันเลือกและลบพฤติกรรม
   const handleSelectBehavior = (behavior: BehaviorType) => {

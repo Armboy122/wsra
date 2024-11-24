@@ -1,35 +1,3 @@
-# version: '3.8'
-
-# services:
-#   db:
-#     image: postgres:14
-#     restart: always
-#     environment:
-#       POSTGRES_DB: wsra
-#       POSTGRES_USER: sakdithat
-#       POSTGRES_PASSWORD: 1q2W3e4R
-#     volumes:
-#       - postgres_data:/var/lib/postgresql/data
-#     ports:
-#       - "5432:5432"
-
-#   web:
-#     image: wsra
-#     build:
-#       context: .
-#       dockerfile: Dockerfile
-#     depends_on:
-#       - db
-#     environment:
-#       DATABASE_URL: "postgresql://sakdithat:1q2W3e4R@db:5432/wsra?schema=public"
-#       NEXTAUTH_SECRET: "armboy"
-#       NEXTAUTH_URL: "http://10.0.0.101:3000"
-#     ports:
-#       - "3000:3000"
-
-# volumes:
-#   postgres_data:
-
 version: '3.8'
 
 services:

@@ -1,81 +1,56 @@
+import prisma from '@/lib/prisma';
+import { NextResponse } from 'next/server';
 
-import prisma from '@/lib/prisma'
-import { NextResponse } from 'next/server'
-
+export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
-
-    // ดึงข้อมูลทั้งหมดพร้อมกัน
     const [statusCounts, topBehaviors] = await Promise.all([
-      // สถานะทั้งหมด
       prisma.behaviorLog.groupBy({
         by: ['status'],
-        _count: true
+        _count: true,
       }),
-
-
-
-      // พฤติกรรมที่พบมากที่สุด
       prisma.behaviorType.findMany({
         select: {
           name: true,
           category: true,
           score: true,
-          behaviorLogs: {
-            where: {
-              behaviorLog: {
-                status: 'approved'
-              }
-            }
-          },
-          _count: {
-            select: {
-              behaviorLogs: {
-                where: {
-                  behaviorLog: {
-                    status: 'approved'
-                  }
-                }
-              }
-            }
-          }
+          _count: { select: { behaviorLogs: true } },
         },
-        orderBy: {
-          behaviorLogs: {
-            _count: 'desc'
-          }
+        orderBy: { behaviorLogs: { _count: 'desc' } },
+        take: 5,
+      }),
+    ]);
+
+    console.log('API Called: statusCounts', statusCounts);
+    console.log('API Called: topBehaviors', topBehaviors);
+
+    return NextResponse.json(
+      {
+        overview: {
+          total: statusCounts.reduce((acc, curr) => acc + curr._count, 0),
+          pending: statusCounts.find((s) => s.status === 'pending')?._count || 0,
+          approved: statusCounts.find((s) => s.status === 'approved')?._count || 0,
+          rejected: statusCounts.find((s) => s.status === 'rejected')?._count || 0,
         },
-        take: 5
-      })
-    ])
-
-    // จัดรูปแบบสถานะรวม
-    const totalStats = {
-      total: statusCounts.reduce((acc, curr) => acc + curr._count, 0),
-      pending: statusCounts.find(s => s.status === 'pending')?._count || 0,
-      approved: statusCounts.find(s => s.status === 'approved')?._count || 0,
-      rejected: statusCounts.find(s => s.status === 'rejected')?._count || 0
-    }
-
-
-
-    // จัดรูปแบบพฤติกรรมที่พบมากที่สุด
-    const formattedTopBehaviors = topBehaviors.map(behavior => ({
-      name: behavior.name,
-      category: behavior.category,
-      score: behavior.score,
-      count: behavior._count.behaviorLogs
-    }))
-
-    return NextResponse.json({
-      overview: totalStats,
-      topBehaviors: formattedTopBehaviors
-    })
+        topBehaviors: topBehaviors.map((b) => ({
+          name: b.name,
+          category: b.category,
+          score: b.score,
+          count: b._count.behaviorLogs,
+        })),
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store',
+        },
+      }
+    );
   } catch (error) {
-    console.error('Error fetching dashboard statistics:', error)
+    console.error('Error fetching data:', error);
     return NextResponse.json(
       { error: 'Failed to fetch dashboard statistics' },
       { status: 500 }
-    )
+    );
   }
 }
+

@@ -5,7 +5,6 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get('category');
-    console.log('API Called with category:', category);
 
     
 
